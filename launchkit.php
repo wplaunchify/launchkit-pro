@@ -7,8 +7,6 @@
  * Description: Everything you need to Launch, Grow, Market & Monetize with WordPress
  * Version:     2.0.9
  * Author:      1WD LLC
- * License:     GPL v2 or later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: wplk
  * Tested up to: 6.6.2
  * Update URI:  https://github.com/wplaunchify/launchkit
