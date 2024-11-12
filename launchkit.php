@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Plugin Name: LaunchKit
+ * Plugin Name: LaunchKit Pro
  * Plugin URI:  https://wplaunchify.com
- * Short Description: LaunchKit makes it possible for anyone get up and running with a fully functional WordPress business site in just a few minutes.
+ * Short Description: LaunchKit makes it possible for anyone to get up and running with a fully functional WordPress business site in just a few minutes.
  * Description: Everything you need to Launch, Grow, Market & Monetize with WordPress
- * Version:     2.0.9
+ * Version:     2.10.0
  * Author:      1WD LLC
  * Text Domain: wplk
  * Tested up to: 6.6.2
- * Update URI:  https://github.com/wplaunchify/launchkit
+ * Update URI:  https://github.com/wplaunchify/launchkit-pro
  * License:     GPLv2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -35,7 +35,7 @@ class LaunchKit {
      * @since 1.0.0
      * @var string The plugin version.
      */
-    const VERSION = '2.0.9';
+    const VERSION = '2.10.0';
 
     /**
      * Minimum PHP Version
@@ -52,37 +52,56 @@ class LaunchKit {
      * @access public
      */
     public function __construct() {
-        // Hook the save function to the appropriate action
+        // Hook to check and delete original plugin upon activation
+        register_activation_hook(__FILE__, array($this, 'check_and_delete_original_plugin'));
+
+        // Other hooks and actions
         add_action('admin_init', array($this, 'save_plugin_settings') );
-
-        // Load textdomain for translation
-        add_action( 'init', array( $this, 'wplk' ) );
-
-        // Load constants and includes
-        add_action( 'init', array($this, 'setup_constants' ));
-
-        // Initialize the Plugin init method
-        add_action( 'plugins_loaded', array( $this, 'init' ) );
-
-        // Initialize the Testing environment
-        add_action( 'plugins_loaded', array($this, 'includes' ));
-
-        // Adds Admin Panel and Content
-        add_action( 'admin_menu', array( $this, 'wplk_add_admin_menu' ));
-        
-        add_action( 'admin_init', array ($this , 'wplk_settings_init' ));
-
-        // Apply Admin Style
-        add_action( 'admin_enqueue_scripts', array( $this, 'wplk_add_script_to_menu_page' ) );
-
-        // Apply Settings
-        add_action( 'init', array( $this, 'wplk_apply_settings' ) );
-
-        // Apply Public Style
+        add_action('init', array( $this, 'wplk' ));
+        add_action('init', array($this, 'setup_constants' ));
+        add_action('plugins_loaded', array( $this, 'init' ));
+        add_action('plugins_loaded', array($this, 'includes' ));
+        add_action('admin_menu', array( $this, 'wplk_add_admin_menu' ));
+        add_action('admin_init', array ($this , 'wplk_settings_init' ));
+        add_action('admin_enqueue_scripts', array( $this, 'wplk_add_script_to_menu_page' ) );
+        add_action('init', array( $this, 'wplk_apply_settings' ) );
         add_action('wp_enqueue_scripts', array($this, 'wplk_add_public_style' ), 999);
-
-        // Add Select All JavaScript
         add_action('admin_footer', array($this, 'add_select_all_script'));
+    }
+
+    /**
+     * Check for original plugin and delete it if found
+     */
+    public function check_and_delete_original_plugin() {
+        $original_plugin_slug = 'launchkit/launchkit.php';
+
+        // Check if the original plugin is active
+        if (is_plugin_active($original_plugin_slug)) {
+            // Deactivate the original plugin
+            deactivate_plugins($original_plugin_slug);
+        }
+
+        // Get the full path to the plugin to delete
+        $plugin_path = WP_PLUGIN_DIR . '/' . dirname($original_plugin_slug);
+
+        // Check if the plugin directory exists and delete it
+        if (is_dir($plugin_path)) {
+            $this->delete_plugin_directory($plugin_path);
+        }
+    }
+
+    /**
+     * Utility function to delete a plugin directory
+     */
+    private function delete_plugin_directory($plugin_path) {
+        if (!class_exists('WP_Filesystem_Base')) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+        }
+        WP_Filesystem();
+        global $wp_filesystem;
+
+        // Delete plugin directory recursively
+        $wp_filesystem->delete($plugin_path, true);
     }
 
     /**

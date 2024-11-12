@@ -16,7 +16,7 @@ class GitHubUpdater
      *
      * @var string .../wp-content/plugins/github-updater-demo/github-updater-demo.php
      */
-    private string $file = '.../wp-content/plugins/launchkit/launchkit.php';
+    private string $file = '.../wp-content/plugins/launchkit-pro/launchkit.php';
 
     /*------------------------------------------------------------------------*/
 
