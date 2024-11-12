@@ -491,7 +491,6 @@ class LaunchKit {
                         <div class="wplk-dashboard__content">
                             <div class="wplk-inner">
                                 <h1><?php esc_html_e('Get Started', 'wplk'); ?></h1>
-								<p>Unlock All Features By <a href='https://wplaunchify.com/#pricing' target='_blank'>Upgrading To Pro</a></p>
                                 <style>
                                     .wplk-settings-container ul {
                                         list-style: disc;
