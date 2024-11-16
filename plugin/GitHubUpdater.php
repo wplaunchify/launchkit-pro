@@ -135,7 +135,10 @@ class GitHubUpdater
 
     public function _moveUpdatedPlugin($result, $options)
     {
-        if ($options['plugin'] !== $this->pluginFile) return $result;
+        if (!isset($options['plugin']) || $options['plugin'] !== $this->pluginFile) {
+            return $result;
+        }
+    
         // Logic for moving updated plugin to its correct location
         return $result;
     }
