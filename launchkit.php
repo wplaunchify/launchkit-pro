@@ -35,7 +35,7 @@ class LaunchKit {
      * @since 1.0.0
      * @var string The plugin version.
      */
-    const VERSION = '2.11.1';
+    const VERSION = '2.11.2';
 
     /**
      * Minimum PHP Version
