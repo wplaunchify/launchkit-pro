@@ -72,7 +72,10 @@ class GitHubUpdater
 
     public function add()
     {
-        // Placeholder for add logic - implement the update logic as needed
+        // Add update hooks to handle plugin updates
+        add_filter('site_transient_update_plugins', [$this, 'checkForUpdates']);
+        add_filter('plugins_api', [$this, 'getPluginDetails'], 10, 3);
+        add_filter('upgrader_post_install', [$this, 'afterInstall'], 10, 3);
     }
 
     private function load()
@@ -130,6 +133,81 @@ class GitHubUpdater
             echo '</p>';
             echo '</div>';
         });
+    }
+
+    public function checkForUpdates($transient)
+    {
+        if (!isset($transient->checked)) {
+            return $transient;
+        }
+
+        $latestRelease = $this->fetchLatestRelease();
+        if (!$latestRelease || version_compare($this->pluginVersion, $latestRelease['tag_name'], '>=')) {
+            return $transient;
+        }
+
+        $transient->response[$this->pluginFile] = (object)[
+            'new_version' => $latestRelease['tag_name'],
+            'package'     => $latestRelease['zipball_url'],
+            'url'         => $this->gitHubUrl,
+        ];
+
+        return $transient;
+    }
+
+    private function fetchLatestRelease()
+    {
+        $url = sprintf('https://api.github.com/repos/%s/releases/latest', $this->gitHubPath);
+        $response = wp_remote_get($url, [
+            'headers' => [
+                'Authorization' => $this->gitHubAccessToken ? 'Bearer ' . $this->gitHubAccessToken : '',
+                'Accept'        => 'application/vnd.github.v3+json',
+            ],
+        ]);
+
+        if (is_wp_error($response)) {
+            return false;
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        return isset($data['tag_name']) ? $data : false;
+    }
+
+    public function getPluginDetails($result, $action, $args)
+    {
+        if ($action !== 'plugin_information' || $args->slug !== $this->pluginSlug) {
+            return $result;
+        }
+
+        $result = (object)[
+            'name'        => $this->pluginSlug,
+            'slug'        => $this->pluginSlug,
+            'version'     => $this->pluginVersion,
+            'author'      => '<a href="https://github.com/' . $this->gitHubOrg . '">' . $this->gitHubOrg . '</a>',
+            'homepage'    => $this->gitHubUrl,
+            'requires'    => '5.0',
+            'tested'      => $this->testedUpTo,
+            'download_link' => $this->fetchLatestRelease()['zipball_url'] ?? '',
+            'sections'    => [
+                'description' => 'This plugin is updated via GitHub.',
+            ],
+        ];
+
+        return $result;
+    }
+
+    public function afterInstall($response, $hook_extra, $result)
+    {
+        global $wp_filesystem;
+        $pluginFolder = WP_PLUGIN_DIR . '/' . $this->pluginDir;
+        $wp_filesystem->move($result['destination'], $pluginFolder);
+        $result['destination'] = $pluginFolder;
+
+        if ($this->pluginFile) {
+            activate_plugin($this->pluginFile);
+        }
+
+        return $response;
     }
 
     private function log($message)
