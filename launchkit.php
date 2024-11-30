@@ -9,6 +9,7 @@
  * Author:      1WD LLC
  * Text Domain: wplk
  * Tested up to: 6.7.1
+ * Requires PHP: 8.0
  * Update URI:  https://github.com/wplaunchify/launchkit-pro
  * License:     GPLv2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
