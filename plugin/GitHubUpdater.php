@@ -46,10 +46,33 @@ class GitHubUpdater
         return $this;
     }
 
+    public function setPluginBannerSmall($file)
+    {
+        $this->pluginBannerSmall = ltrim($file, '/');
+        return $this;
+    }
+
+    public function setPluginBannerLarge($file)
+    {
+        $this->pluginBannerLarge = ltrim($file, '/');
+        return $this;
+    }
+
+    public function setChangelog($changelog)
+    {
+        $this->changelog = ltrim($changelog, '/');
+        return $this;
+    }
+
     public function enableDebugger()
     {
         $this->enableDebugger = true;
         return $this;
+    }
+
+    public function add()
+    {
+        // Placeholder for add logic - implement the update logic as needed
     }
 
     private function load()
@@ -107,73 +130,6 @@ class GitHubUpdater
             echo '</p>';
             echo '</div>';
         });
-    }
-
-    private function convertMarkdownToHtml($markdown)
-    {
-        $html = [];
-        $lines = explode(PHP_EOL, $markdown);
-        $index = 0;
-
-        while (isset($lines[$index])) {
-            $line = trim($lines[$index]);
-
-            if ($this->isMarkdownHeader($line)) {
-                $element = $this->convertMarkdownHeader($line);
-            } elseif ($this->isMarkdownList($line)) {
-                $element = $this->convertMarkdownList($index, $lines);
-            } else {
-                $element = ['<p>' . $line . '</p>'];
-            }
-
-            $html = array_merge($html, $element);
-            $index++;
-        }
-
-        return implode(PHP_EOL, $html);
-    }
-
-    private function isMarkdownHeader($line)
-    {
-        return strpos($line, '#') === 0;
-    }
-
-    private function convertMarkdownHeader($line)
-    {
-        $html = preg_replace_callback(
-            '/(#{1,6}) (.+)/',
-            function ($match) {
-                $size = strlen($match[1]);
-                return '<h' . $size . '>' . $match[2] . '</h' . $size . '>';
-            },
-            $line
-        );
-
-        return [$html];
-    }
-
-    private function isMarkdownList($line)
-    {
-        return strpos($line, '-') === 0;
-    }
-
-    private function convertMarkdownList(&$index, $lines)
-    {
-        $html[] = '<ul>';
-
-        do {
-            $html[] = preg_replace(
-                '/- (.+)/',
-                '<li>$1</li>',
-                trim($lines[$index])
-            );
-            $index++;
-        } while (isset($lines[$index]) && $this->isMarkdownList(trim($lines[$index])));
-
-        $index--;
-        $html[] = '</ul>';
-
-        return $html;
     }
 
     private function log($message)
