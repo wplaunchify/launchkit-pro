@@ -826,61 +826,57 @@ class GitHubUpdater
      * @param array $options ['plugin' => 'github-updater-demo/github-updater-demo.php', ...]
      * @return array
      */
-    public function _moveUpdatedPlugin(array $result, array $options): array
-    {
-        // Get plugin being updated
-        // e.g. `github-updater-demo/github-updater-demo.php`
-        $pluginFile = $options['plugin'] ?? '';
-
-        // If plugin does not match this plugin, exit
-        if ($pluginFile !== $this->pluginFile) return $result;
-
-        $this->logStart(
-            '_moveUpdatedPlugin', 'upgrader_install_package_result'
-        );
-
-        // Save path to new plugin
-        // e.g. `.../wp-content/plugins/github-updater-demo-main`
-        $newPluginPath = $result['destination'] ?? '';
-
-        $this->log(
-            'Does $newPluginPath (' . $newPluginPath . ') exist...'
-        );
-
-        // If path to new plugin doesn't exist, exit
-        if (!$newPluginPath) {
-            $this->log('No');
-            $this->logValue('Return early', $result);
-            $this->logFinish('_moveUpdatedPlugin');
-
-            return $result;
-        }
-
-        $this->log('Yes');
-
-        // Save root path to all plugins, e.g. `.../wp-content/plugins`
-        $pluginRootPath = $result['local_destination'] ?? WP_PLUGIN_DIR;
-
-        // Piece together path to old plugin,
-        // e.g. `.../wp-content/plugins/github-updater-demo`
-        $oldPluginPath = $pluginRootPath . '/' . $this->pluginDir;
-
-        // Move new plugin to old plugin directory
-        move_dir($newPluginPath, $oldPluginPath);
-
-        // Update result based on changes above
-        // destination:         `.../wp-content/plugins/github-updater-demo`
-        // destination_name:    `github-updater-demo`
-        // remote_destination:  `.../wp-content/plugins/github-updater-demo`
-        $result['destination'] = $oldPluginPath;
-        $result['destination_name'] = $this->pluginDir;
-        $result['remote_destination'] = $oldPluginPath;
-
-        $this->logValue('Return', $result);
-        $this->logFinish('_moveUpdatedPlugin');
-
+ public function _moveUpdatedPlugin(array|WP_Error $result, array $options): array|WP_Error
+{
+    // Check if $result is a WP_Error, if so, return it without modifying
+    if (is_wp_error($result)) {
+        $this->log('WP_Error detected in _moveUpdatedPlugin: ' . $result->get_error_message());
         return $result;
     }
+
+    // Get plugin being updated
+    $pluginFile = $options['plugin'] ?? '';
+
+    // If plugin does not match this plugin, exit
+    if ($pluginFile !== $this->pluginFile) return $result;
+
+    $this->logStart('_moveUpdatedPlugin', 'upgrader_install_package_result');
+
+    // Save path to new plugin
+    $newPluginPath = $result['destination'] ?? '';
+
+    $this->log('Does $newPluginPath (' . $newPluginPath . ') exist...');
+
+    // If path to new plugin doesn't exist, exit
+    if (!$newPluginPath) {
+        $this->log('No');
+        $this->logValue('Return early', $result);
+        $this->logFinish('_moveUpdatedPlugin');
+        return $result;
+    }
+
+    $this->log('Yes');
+
+    // Save root path to all plugins
+    $pluginRootPath = $result['local_destination'] ?? WP_PLUGIN_DIR;
+
+    // Piece together path to old plugin
+    $oldPluginPath = $pluginRootPath . '/' . $this->pluginDir;
+
+    // Move new plugin to old plugin directory
+    move_dir($newPluginPath, $oldPluginPath);
+
+    // Update result based on changes above
+    $result['destination'] = $oldPluginPath;
+    $result['destination_name'] = $this->pluginDir;
+    $result['remote_destination'] = $oldPluginPath;
+
+    $this->logValue('Return', $result);
+    $this->logFinish('_moveUpdatedPlugin');
+
+    return $result;
+}
+
 
     /**************************************************************************/
 
