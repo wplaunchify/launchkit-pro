@@ -15,7 +15,7 @@ class Plugin
     {
         // Instantiate GitHubUpdater directly, assuming it's in the same (global) namespace
         $updater = new GitHubUpdater($file);
-        $updater->setBranch('master')
+        $updater->setBranch('main')
                 ->setPluginIcon('assets/images/icon-256x256.png')
                 ->setPluginBannerSmall('assets/images/banner-772x250.gif')
                 ->setPluginBannerLarge('assets/images/banner-1544x500.gif')
