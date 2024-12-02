@@ -3,7 +3,7 @@
 Contributors: @1wdtv
 Tags: ecommerce, membership, marketing, sales-funnels, checkout
 Tested up to: 6.7.1
-Requires PHP: 7.4
+Requires PHP: 8.0
 Stable tag: 2.11.4
 Description: Everything you need to Launch, Grow, Market & Monetize with WordPress
 License: GPLv2 or later
