@@ -4,7 +4,7 @@ Contributors: @1wdtv
 Tags: ecommerce, membership, marketing, sales-funnels, checkout
 Tested up to: 6.7.1
 Requires PHP: 8.0
-Stable tag: 2.11.4
+Stable tag: 2.11.5
 Description: Everything you need to Launch, Grow, Market & Monetize with WordPress
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -64,6 +64,10 @@ Instead of creating Frankenstein Monsters by purchasing and installing random pl
 
 
 ## Changelog
+
+12-05-2024  - version 2.11.5
+* Tweak     - fixed installer for ZipWP.com sandbox use
+
 
 12-02-2024  - version 2.11.4
 * Tweak     - fixed license manager scope to prevent ajax interference formiddable forms
