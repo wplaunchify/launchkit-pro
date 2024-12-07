@@ -185,8 +185,9 @@ class WPLKLicenseKeyAutoloader {
         $default_key = isset($user_data['default_key']) ? $user_data['default_key'] : '';
         $current_key = get_option('__fluent_community_pro_license_key', '');
 
+        // optional css for fluent community license key menus
         if ($current_key === $default_key) {
-            echo '<style>.fcom_portal_section { display: none !important; }</style>';
+         //   echo '<style>.fcal_license_box { display: none !important; }</style>';
         }
     }
 }
