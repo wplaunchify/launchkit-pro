@@ -1,6 +1,6 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-    exit; // Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
 }
 
 class WPLKLicenseKeyAutoloader {
@@ -11,6 +11,14 @@ class WPLKLicenseKeyAutoloader {
         add_action('admin_init', array($this, 'conditionally_run_license_key_autoloader_save'));
         add_action('admin_init', array($this, 'license_key_autoloader_check_default_key'));
         add_action('admin_head', array($this, 'hide_fcom_portal_section_if_default_key'));
+        
+        // License override filters
+        add_filter('pre_option___fluent_community_pro_license', array($this, 'override_fluent_license_status'), 10, 1);
+        add_filter('pre_update_option___fluent_community_pro_license', array($this, 'filter_license_update'), 10, 2);
+        add_filter('site_transient_update_plugins', array($this, 'modify_plugin_update_transient'));
+        
+        // Remove license notices
+        add_action('admin_init', array($this, 'remove_license_notices'), 999);
     }
 
     public function launchkit_license_menu() {
@@ -100,7 +108,7 @@ class WPLKLicenseKeyAutoloader {
 
     public function conditionally_run_license_key_autoloader_save() {
         if (defined('DOING_AJAX') && DOING_AJAX) {
-            return; 
+            return;
         }
 
         if (!isset($_GET['page']) || $_GET['page'] !== 'wplk' || !isset($_GET['tab']) || $_GET['tab'] !== 'license') {
@@ -108,6 +116,50 @@ class WPLKLicenseKeyAutoloader {
         }
 
         $this->license_key_autoloader_save();
+    }
+
+    public function override_fluent_license_status($value) {
+        $user_data = get_transient('lk_user_data');
+        $default_key = isset($user_data['default_key']) ? $user_data['default_key'] : '';
+        
+        return array(
+            'license_key' => $default_key,
+            'status' => 'valid',
+            'expires' => date('Y-m-d', strtotime('+10 years')),
+            'price_id' => '1',
+            '_last_checked' => time()
+        );
+    }
+
+    public function filter_license_update($value, $old_value) {
+        if(is_array($value)) {
+            $value['status'] = 'valid';
+            $value['expires'] = date('Y-m-d', strtotime('+10 years'));
+        }
+        return $value;
+    }
+
+    public function modify_plugin_update_transient($transient) {
+        if (isset($transient->response['fluent-community-pro/fluent-community-pro.php'])) {
+            unset($transient->response['fluent-community-pro/fluent-community-pro.php']);
+        }
+        return $transient;
+    }
+
+    public function remove_license_notices() {
+        global $wp_filter;
+        if (isset($wp_filter['admin_notices'])) {
+            foreach ($wp_filter['admin_notices']->callbacks as $priority => $callbacks) {
+                foreach ($callbacks as $key => $callback) {
+                    if (is_array($callback['function']) && is_object($callback['function'][0])) {
+                        $class_name = get_class($callback['function'][0]);
+                        if (strpos($class_name, 'FluentCommunity') !== false) {
+                            remove_action('admin_notices', $callback['function'], $priority);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public function license_key_autoloader_save() {
@@ -133,6 +185,7 @@ class WPLKLicenseKeyAutoloader {
                     $default_key,
                     isset($_POST['fluent_license_key']) ? sanitize_text_field($_POST['fluent_license_key']) : null
                 );
+                $this->update_fluent_license_status($default_key);
                 break;
 
             case 'acf':
@@ -152,12 +205,21 @@ class WPLKLicenseKeyAutoloader {
         }
     }
 
+    private function update_fluent_license_status($default_key) {
+        update_option('__fluent_community_pro_license', array(
+            'license_key' => $default_key,
+            'status' => 'valid',
+            'expires' => date('Y-m-d', strtotime('+10 years')),
+            'price_id' => '1',
+            '_last_checked' => time()
+        ));
+    }
+//
     private function save_or_reset_acf_key($default_key, $new_key) {
         $license_data = array(
             'key' => $new_key ? $new_key : $default_key,
             'url' => get_site_url()
         );
-
         update_option('acf_pro_license', base64_encode(serialize($license_data)));
     }
 
@@ -165,11 +227,16 @@ class WPLKLicenseKeyAutoloader {
         $user_data = get_transient('lk_user_data');
         $default_key = isset($user_data['default_key']) ? $user_data['default_key'] : '';
 
-        $current_key = get_option('__fluent_community_pro_license_key', '');
-        if (empty($current_key)) {
+        // Set Fluent Community Pro license
+        if (empty(get_option('__fluent_community_pro_license_key'))) {
             update_option('__fluent_community_pro_license_key', $default_key);
         }
+        
+        if (empty(get_option('__fluent_community_pro_license'))) {
+            $this->update_fluent_license_status($default_key);
+        }
 
+        // Set ACF Pro license
         $acf_license = get_option('acf_pro_license', '');
         if (empty($acf_license)) {
             $license_data = array(
@@ -185,10 +252,10 @@ class WPLKLicenseKeyAutoloader {
         $default_key = isset($user_data['default_key']) ? $user_data['default_key'] : '';
         $current_key = get_option('__fluent_community_pro_license_key', '');
 
-        // optional css for fluent community license key menus
         if ($current_key === $default_key) {
-         //   echo '<style>.fcal_license_box { display: none !important; }</style>';
+            // echo '<style>.fcal_license_box, #fluent-community-pro-invalid-notice { display: none !important; }</style>';
         }
     }
 }
+
 new WPLKLicenseKeyAutoloader();
