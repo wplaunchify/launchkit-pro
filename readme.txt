@@ -4,7 +4,7 @@ Contributors: @1wdtv
 Tags: ecommerce, membership, marketing, sales-funnels, checkout
 Tested up to: 6.7.1
 Requires PHP: 8.0
-Stable tag: 2.12.1
+Stable tag: 2.13.0
 Description: Everything you need to Launch, Grow, Market & Monetize with WordPress
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -64,6 +64,9 @@ Instead of creating Frankenstein Monsters by purchasing and installing random pl
 
 
 ## Changelog
+
+04-01-2025  - version 2.13.0
+* Tweak     - improved license management interface and conditional application
 
 03-17-2025  - version 2.12.1
 * Tweak     - improved notifications when plugins require update and different hosts
