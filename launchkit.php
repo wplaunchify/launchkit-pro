@@ -4,7 +4,7 @@
  * Plugin URI:  https://wplaunchify.com
  * Short Description: LaunchKit makes it possible for anyone to get up and running with a fully functional WordPress business site in just a few minutes.
  * Description: Everything you need to Launch, Grow, Market & Monetize with WordPress.
- * Version:     2.13.0
+ * Version:     2.13.1
  * Author:      1WD LLC
  * Text Domain: wplk
  * Tested up to: 6.7.1
@@ -700,7 +700,8 @@ if (!class_exists('LaunchKit')) {
                             .yzp-heading, 
                             .youzify-affiliate-banner,
                             .pms-cross-promo,
-                            .yzp-heading
+                            .yzp-heading,
+                            .fs-slug-clickwhale
                             {
                                 display: none !important;
                             }
