@@ -4,11 +4,11 @@
  * Plugin URI:  https://wplaunchify.com
  * Short Description: LaunchKit makes it possible for anyone to get up and running with a fully functional WordPress business site in just a few minutes.
  * Description: Everything you need to Launch, Grow, Market & Monetize with WordPress.
- * Version:     2.13.1
+ * Version:     2.13.2
  * Author:      1WD LLC
  * Text Domain: wplk
  * Tested up to: 6.7.1
- * Requires PHP: 8.0
+ * Requires PHP: 7.4
  * Update URI:  https://github.com/wplaunchify/launchkit-pro
  * License:     GPLv2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -16,19 +16,12 @@
 
 if (!defined('ABSPATH')) exit;
 
-// Include the autoloader
-require_once 'autoloader.php';
-
-// Instantiate the Plugin class without any namespace
-new Plugin(__FILE__);
-
 // Prevent redeclaration by checking if the class already exists.
 if (!class_exists('LaunchKit')) {
 
     class LaunchKit {
 
-        const VERSION = '2.13.0';
-        const MINIMUM_PHP_VERSION = '8.0';
+        const VERSION = '2.13.2';
 
         public function __construct() {
             register_activation_hook(__FILE__, array($this, 'check_and_delete_original_plugin'));
@@ -107,13 +100,15 @@ if (!class_exists('LaunchKit')) {
             load_plugin_textdomain('wplk');
         }
 
+
         public function init() {
             require_once('includes/class-wplk-deleter.php');
             require_once('includes/class-wplk-functions-launchkit.php');
-            require_once('includes/class-wplk-installer.php');
+            require_once('includes/class-wplk-installer.php'); 
             require_once('includes/class-wplk-license-loader.php');
             require_once('includes/class-wplk-manager.php');
             require_once('includes/class-wplk-pluginmanager.php');
+            require_once('includes/class-wplk-updater.php');
         }
 
         public function setup_constants() {
